@@ -1,12 +1,13 @@
 package com.example.planner.trip;
 
-import com.example.planner.participants.ParticipantService;
+import com.example.planner.participants.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,6 +22,9 @@ public class TripController {
     @Autowired //injeção de dependencia
     private TripRepository repository;
 
+    @Autowired //injeção de dependencia
+    private ParticipantRepository participantRepository;
+
     /****** POST Routes ******/
 
     //Inserting trip
@@ -34,6 +38,26 @@ public class TripController {
         this.participantService.registerParticipantsToEvent(payload.emails_to_invite(), newTrip);
 
         return ResponseEntity.ok(new TripCreateResponse(newTrip.getId()) );
+
+    }
+
+    //Invite participant on trip
+    @PostMapping("{id}/invite")
+    public ResponseEntity<ParticipantCreateResponse> inviteParticipant(@PathVariable UUID id, @RequestBody ParticipantRequestPayload payload) {
+
+        Optional<Trip> tripReturn = this.repository.findById(id);
+
+        if(tripReturn.isPresent()){
+            Trip rawTrip = tripReturn.get();
+
+            ParticipantCreateResponse participantResponse = participantService.registerParticipantToEvent(payload.email(), rawTrip);
+
+            if(rawTrip.getIsConfirmed()){
+                participantService.triggerConfirmationEmailToParticipant(payload.email());
+            }
+            return ResponseEntity.ok(participantResponse);
+        }
+        return ResponseEntity.notFound().build();
 
     }
 
@@ -57,6 +81,18 @@ public class TripController {
         } else {
             return ResponseEntity.ok(trips);
         }
+    }
+
+    @GetMapping("/{id}/participants")
+    public ResponseEntity<List<ParticipantData>> getParticipantsByTripId(@PathVariable UUID id){
+        Optional<Trip> tripReturn = this.repository.findById(id);
+
+        if(tripReturn.isPresent()){
+
+            return ResponseEntity.ok(this.participantService.getAllParticipantsFromTrip(id));
+
+        }
+        return ResponseEntity.notFound().build();
     }
 
     // Confirm trip by ID
