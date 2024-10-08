@@ -20,7 +20,7 @@ Certifique-se de ter o Java instalado em sua máquina.
 
 1. Clone o repositório:
     ```bash
-    git clone https://github.com/thiaguss/Planner.git
+    git clone https://github.com/isaacmachado138/planner-spring.git
     ```
 2. Importe o projeto em sua IDE de preferência (IntelliJ, Eclipse, VSCode, etc.).
 
