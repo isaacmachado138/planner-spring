@@ -7,6 +7,7 @@ Este projeto é uma API para planejar viagens, desenvolvida como parte do evento
 
 - Java
 - Spring Boot
+- JPA
 - Flyway
 - H2 Database
 
